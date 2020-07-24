@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Refit;
 using RestSharp;
 using System;
-using System.Threading.Tasks;
 
 namespace ConsultaCep
 {
@@ -13,7 +11,7 @@ namespace ConsultaCep
             try
             {
                 Console.Write("Infome seu cep: ");
-                string cepInformado = Console.ReadLine().ToString();
+                string cepInformado = Console.ReadLine().ToString().Replace("-", "").Replace(".", "");
                 Console.WriteLine("");
 
                 if (cepInformado.Length == 8)
@@ -30,8 +28,6 @@ namespace ConsultaCep
                                       $"Bairro: {retorno.Bairro} \b\n" +
                                       $"Cidade: {retorno.Localidade} \b\n" +
                                       $"Complemento: {retorno.Complemento} \b\n");
-
-                    Console.ReadKey();
                 }
                 else
                 {
