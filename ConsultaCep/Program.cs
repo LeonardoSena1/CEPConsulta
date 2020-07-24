@@ -1,4 +1,6 @@
-﻿using Refit;
+﻿using Newtonsoft.Json;
+using Refit;
+using RestSharp;
 using System;
 using System.Threading.Tasks;
 
@@ -6,32 +8,48 @@ namespace ConsultaCep
 {
     class Program
     {
-        class MainClass
+        static void Main(string[] args)
         {
-            static async Task Main(string[] args)
+            try
             {
-                try
+                Console.Write("Infome seu cep: ");
+                string cepInformado = Console.ReadLine().ToString();
+                Console.WriteLine("");
+
+                if (cepInformado.Length == 8)
                 {
-                    var cepClient = RestService.For<ICepApiServece>("https://viacep.com.br");
-                    Console.Write("Informe seu cep: ");
+                    var client = new RestClient("https://viacep.com.br/ws/" + $"{cepInformado}" + "/json/");
+                    var request = new RestRequest(Method.GET);
+                    IRestResponse response = client.Execute(request);
 
-                    string cepInformado = Console.ReadLine().ToString();
-                    Console.WriteLine("Consultado informações do CEP: " + cepInformado);
+                    Console.WriteLine("Status da busca " + response.StatusCode);
 
-                    var address = await cepClient.GetAddressAsync(cepInformado);
+                    var retorno = JsonConvert.DeserializeObject<CepResponse>(response.Content);
 
-                    Console.Write($"\nRua: {address.Logradouro}\nBairro: {address.Bairro}\nComplemento: {address.Complemento}\nCidade: {address.Localidade}\nuf: {address.Uf} ");
+                    Console.WriteLine($"Rua: {retorno.Logradouro} \b\n" +
+                                      $"Bairro: {retorno.Bairro} \b\n" +
+                                      $"Cidade: {retorno.Localidade} \b\n" +
+                                      $"Complemento: {retorno.Complemento} \b\n");
 
                     Console.ReadKey();
-
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.WriteLine("Erro na consulta de Cep: " + e.Message);
-                    Console.WriteLine("Informe o Cep correto.");
-                    Console.ReadLine();
+                    Console.WriteLine("Cep mal informado");
                 }
             }
+            catch (Exception)
+            {
+                Console.WriteLine("Erro na consulta de Cep... ");
+                Console.WriteLine("Informe o Cep correto.");
+                Console.ReadLine();
+            }
+            finally
+            {
+                Console.WriteLine("Busca concluida");
+                Console.ReadKey();
+            }
+            Console.ReadKey();
         }
     }
 }
